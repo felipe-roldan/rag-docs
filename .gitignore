@@ -1,0 +1,11 @@
+# venv
+v_rag/
+
+
+# files
+.env
+*.pdf
+*.pyc
+
+
+# folders
