@@ -289,25 +289,6 @@ class ProcessDocument():
     )
     return bool(document_results.get("ids"))
   
-  def delete_document_from_vdb(self, title: str) -> bool:
-    if not title:
-      logging.error("Numero de ciro no proporcionado")
-      return False
-    document_results = self._chroma_vdb.get(
-      where={
-        "titulo": {"$eq": title}
-      },
-      # include=["ids"]
-    )
-    if document_results.get("ids"):
-      self._chroma_vdb.delete(
-        ids=document_results.get("ids")
-      )
-      logging.info(f"Documento {title} eliminado de vdb")
-      return True
-    logging.info(f"Documento {title} no encontrado en vdb")
-    return False
-  
   def _transform_doc_with_metadata(self) -> list[Document]:
     documents: list = []
     for page_number in range(self._document_pdf.page_count):
@@ -376,8 +357,6 @@ class ProcessDocument():
     
   def _load_chroma_vbd(self, collection_name: str="rag-docs") -> Chroma:
     #* En caso que no exista la coleccion, se crea
-    # if collection_name not in self._chroma_http_client.list_collections():
-    #   self._chroma_http_client.create_collection(name=collection_name)
     try:
       self._chroma_http_client.get_collection(name=collection_name)
       logging.info(f"Coleccion {collection_name} existente")
@@ -390,75 +369,4 @@ class ProcessDocument():
       embedding_function=self._embeddings_service,
       client=self._chroma_http_client
     )
-    
-if __name__ == "__main__":
-  DOCS_PATH = Path(__file__).parent 
-  folder_path = DOCS_PATH 
-  file_name = "Insurance_2030.pdf"
-  document_title = "Insurance 2030: The impact of AI on the future of insurance"
-  file_path = str(folder_path / file_name)
-  
-  try:
-    with open(file_path, 'rb') as file:
-      pdf_bytes = file.read()
-  except Exception as e:
-    logging.error(f"Error al cargar el archivo {file_path}:::{e}")
-  
-  doc = ProcessDocument(
-    query_id="1",
-    document_bytes=pdf_bytes.hex(),
-    document_title=document_title
-  )
-  
-  #* Cargar servicios
-  logging.info("Cargando servicios")
-  doc.load_services()
-  
-  #* Procesar documento
-  logging.info("Procesando documento")
-  doc.load_document()
-  doc.process_document()
-  
-
-  #* Buscar en la vdb
-  # query = """
-  # What are the trends for IA in the insurance industry?
-  # """
-  # results = doc.get_results_from_vdb_search(
-  #   query=query,
-  #   k_results=4
-  # )
-  # for result in results:
-  #   print(f"Score:::{result[1]}")
-  #   print(f"Metadata:::{result[0].metadata}")
-  #   print(f"Texto:::{result[0].page_content}")
-  #   print("-"*50)
-  #   print("\n\n")
-  
-  # pdb.set_trace()
-  
-  #* Respuesta por RAG con cadena de QA sin salida estructurada
-  query = """
-  How AI is going to affect claims?
-  """
-  answer_qa = doc.get_answer_from_rag_qa(
-    query=query,
-    k_results=6
-  )
-  for key, value in answer_qa.items():
-    print("-"*50)
-    print(f"{key}:::{value}")
-    
-  pdb.set_trace()
-  
-  #* Respuesta por RAG con reranking sin salida estructurada
-  answer_re = doc.get_reranked_results(
-    query=query,
-    k_results=6
-  )
-  print(f"Answer:::{answer_re}")
-  
-  
-  
-  
-  
+ 
