@@ -6,6 +6,7 @@ v_rag/
 .env
 *.pdf
 *.pyc
+requirements_base.txt
 
 
 # folders
