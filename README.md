@@ -1,18 +1,20 @@
 ## RAG - DOCS
 
+Realizado por: [Felipe Gonzalez Roldan](https://felipeg17.github.io/index.html)
+
 ### Generalidades
-Se utilizó una estructura basada en RAG (Retrieval Augmented Generation), ya que permite combinar el conocimiento embedido en un gran modelo de lenguaje (LLM) con una base especifica de datos, tal como el documento proporcionado.
+Se utilizó una estructura basada en RAG (Retrieval Augmented Generation), ya que permite combinar el conocimiento embebido en un gran modelo de lenguaje (LLM) con una base específica de datos, tal como el documento proporcionado.
 
 Ventajas del RAG:
 + Escalable a soluciones empresariales
-+ Manejo y preservación de la base de conocimientos especificos
++ Manejo y preservación de la base de conocimientos específicos
 + Consumo bajo/moderado de tokens de LLMs
 
 ### Estructura
 
-Para la solución implementada se utilizó `langchain`, el cual es uno de los *frameworks* más extendidos para el consumo programáticos de LLMs, ademas de brindar soporte e integración con una varidad de elementos como: servicios de IA, bases vectoriales, bases relacionales, entre otros.
+Para la solución implementada se utilizó `langchain`, el cual es uno de los *frameworks* más extendidos para el consumo programático de LLMs, además de brindar soporte e integración con una variedad de elementos como: servicios de IA, bases vectoriales, bases relacionales, entre otros.
 
-Asimismo proporciona facilidad cognitiva al integrar el *LCEL* que permite simplificar los flujos de interacción con modelos de IA usando secuencias conocidas como cadenas.
+Asimismo, proporciona facilidad cognitiva al integrar el *LCEL* que permite simplificar los flujos de interacción con modelos de IA usando secuencias conocidas como cadenas.
 
 #### Arquitectura RAG
 
@@ -26,18 +28,18 @@ Toda la arquitectura del RAG se encuentra incorporada en la  [clase Process Docu
 
 #### Ingesta de documento
 
-Se utiliza el paquete `PyMuPdf` también conocido como `fitz`, en términos generales es uno de los PDF *loaders* permitiendo hacer análisis detallado del documento, casi a nivel de componentes. PAra esta aplicación se carga el documento es forma de *bytes* para facilitar la tranferencia y evitar el almacenamiento local. Se utiliza el método `load_page().get_text()` para obtener el texto cada página.
+Se utiliza el paquete `PyMuPdf` también conocido como `fitz`, en términos generales es uno de los PDF *loaders* permitiendo hacer análisis detallado del documento, casi a nivel de componentes. Para esta aplicación se carga el documento en forma de *bytes* para facilitar la transferencia y evitar el almacenamiento local. Se utiliza el método `load_page().get_text()` para obtener el texto de cada página.
 
 Luego se transforma el documento para ser ingestado en la base de datos vectorial en 3 pasos:
 
-1. Extracción de metadata: Se crea una lista de *Documents* con metadata a nivel de pagina (titulo, pagina, tipo de documento, page_content), esta información es relevante para la búsqueda por metadata en la base vectorial.
-2. Splitting y chuncking: Se dividen cada uno de los *Documents* por una cierta cantidad de caracteres. Se utilizó la técnica de *recursive chunking* donde se trata de dividir cada fragmento usando un parametro de ciertos caracteres procurando respetar saltos de linea y signos de puntuación. También se incorporó la alternativa de *semantic chunking* donde la partición de los textos se hace por similitud semántica. Como hiperparametros se usó 800 caracteres de partición que equivale a casi media pagina de texto.
-3. Creación de embeddings: Con el texto divido se obtienen los *embeddings* que son la representación vectorial de los fragmentos de texto. Se utilizó el modelo de `ada-002` de openAI por su uso extendido. 
+1. Extracción de metadata: Se crea una lista de *Documents* con metadata a nivel de página (título, página, tipo de documento, page_content), esta información es relevante para la búsqueda por metadata en la base vectorial.
+2. Splitting y chunking: Se dividen cada uno de los *Documents* por una cierta cantidad de caracteres. Se utilizó la técnica de *recursive chunking* donde se trata de dividir cada fragmento usando un parámetro de ciertos caracteres procurando respetar saltos de línea y signos de puntuación. También se incorporó la alternativa de *semantic chunking* donde la partición de los textos se hace por similitud semántica. Como hiperparámetros se usó 800 caracteres de partición que equivale a casi media página de texto.
+3. Creación de embeddings: Con el texto dividido se obtienen los *embeddings* que son la representación vectorial de los fragmentos de texto. Se utilizó el modelo de `ada-002` de openAI por su uso extendido.
 
 
 #### Base vectorial
 
-La base de la técnica RAG es el uso de *embeddings* almacenados en una base de datos vectorial. Los *embeddings* son un tipo especial de *transformer* que permite convertir un texto en una representación vectorial que conserva el contexto, el sentido semántico y el significado del texto. De esta manera se puede conservar la *idea* del leguaje humano. Luego se puede comparar con otros fragmentos de texto y analizar la similitud entre significados. De este modo al almacenar un documento de forma vectorial se puede relacionar directamente una pregunta especifica con el fragmento de texto que más se parezca de forma semántica, ya que se obtienen los *embeddings* de la pregunta y se comparan con los almacenados en la base vectorial. Generando así un sistema que responde de manera experta usando como referencia una base de conocimiento.
+La base de la técnica RAG es el uso de *embeddings* almacenados en una base de datos vectorial. Los *embeddings* son un tipo especial de *transformer* que permite convertir un texto en una representación vectorial que conserva el contexto, el sentido semántico y el significado del texto. De esta manera se puede conservar la *idea* del lenguaje humano. Luego se puede comparar con otros fragmentos de texto y analizar la similitud entre significados. De este modo, al almacenar un documento de forma vectorial, se puede relacionar directamente una pregunta específica con el fragmento de texto que más se parezca de forma semántica, ya que se obtienen los *embeddings* de la pregunta y se comparan con los almacenados en la base vectorial. Generando así un sistema que responde de manera experta usando como referencia una base de conocimiento.
 
 Para esta solución se optó por `chromadb` como base de datos vectorial teniendo como argumentos sus ventajas:
 
@@ -49,7 +51,7 @@ Para esta solución se optó por `chromadb` como base de datos vectorial teniend
 6. Integración directa con Langchain
 7. Filtrado por metadata y contenido
 
-Se utilizó un cliente https de una base vectorial de `chroma` corriendo en un contendor en la nube. Se utilizó la división por: 
+Se utilizó un cliente https de una base vectorial de `chroma` corriendo en un contenedor en la nube. Se utilizó la división por: 
 
 - tenant: 'dev'
 - database: 'rag-database'
@@ -57,7 +59,7 @@ Se utilizó un cliente https de una base vectorial de `chroma` corriendo en un c
 
 #### Cadena QA
 
-Si bien la busqueda de información la base de conocimiento se puede hacer directamente a través de una pregunta y comparación semántica. Se obienen mejores resultados utilizando una cadena QA. 
+Si bien la busqueda de información la base de conocimiento se puede hacer directamente a través de una pregunta y comparación semántica. Se obtienen mejores resultados utilizando una cadena QA. 
 En este caso se tiene un LLMs de intermediario entre la pregunta y la respuesta, permitiendo mayor flexibilidad en la información recolectada. 
 
 El método RAG, tiene un *Retriever* que consiste en el proceso de búsqueda en la base vectorial y el *Augmented Generation* se logra con un LLM, para está aplicación se seleccionó `gpt-4o-mini` por su bajo costo por token y los buenos resultados en benchmarks.
@@ -93,7 +95,7 @@ Question:
 
 #### Cadena Reranking
 
-El método de recuperación de los fragmentos de texto ysu porterior uso por parte del LLM para generar la respuesta puede ser susceptible a errores de contexto, esto es, que el texto recuperado no sea útil para responder la pregunta. Para solventar esto se utiliza un LLM auxiliar que permite establecer y priorizar aquellos fragmentos que sean RELEVANTES para responder, esto es, se encarga de filtrar y reorganizar la información recuperada, proceso conocido como *reranking*. El modelo utilizado para este procedimiento fue `cohere rerank-v3.5`, que presenta un costo por tokens relativamente bajo y permite tener mayor certeza del contexto usado para responder.
+El método de recuperación de los fragmentos de texto ysu porterior uso por parte del LLM para generar la respuesta puede ser susceptible a errores de contexto, esto es, que el texto recuperado no sea útil para responder la pregunta. Para solventar esto se utiliza un LLM auxiliar que permite establecer y priorizar aquellos fragmentos que sean RELEVANTES para responder, ed decir, se encarga de filtrar y reorganizar la información recuperada, proceso conocido como *reranking*. El modelo utilizado para este procedimiento fue `cohere rerank-v3.5`, que presenta un costo por tokens relativamente bajo y permite tener mayor certeza del contexto usado para responder.
 
 En la clase [clase Process Document](/app/procesar_documento/services/process_document.py) el método `get_reranked_results` permite seguir realizar el proceso de reranking. En general es el mismo procedimiento que la cadena QA, usando el mismo prompt, solo que se agrega una llamado al modelo de reranking que toma el Retrieval y filta los fragmentos de contexto y luego el LLM responde la pregunta filtrada con el contexto relevante.
 
@@ -206,7 +208,7 @@ Usando los **traces** de Langsmith se obtuvo:
 |----------------------|---------------------|-------------------------|
 | get_reranked_results | 4.04                | 878.50                  |
 
-El tiempo de respuesta medio es de casi 4 segundos lo que es perfectamente integrable en cualquier aplicación de respuesta rápida. La mayoria de respuestas estuvieron por debajo de los 3 segundos.
+El tiempo de respuesta medio es de casi *4 segundos* lo que es perfectamente integrable en cualquier aplicación de respuesta rápida. La mayoria de respuestas estuvieron por debajo de los 3 segundos.
 
 Respecto al consumo de tokens el promedio de consulta fue de 880 tokens por *trace*, lo que implica un costo de $0.0001761 USD, con esto se puede obtener una volumetría y estimar costos globales de consumo.
 
@@ -223,7 +225,7 @@ La respuesta en todos los casos fue:
 AI is expected to significantly impact claims processing in the insurance industry by reducing the headcount associated with claims by 70 to 90 percent compared to 2018 levels. Advanced algorithms will handle initial claims routing, which will increase efficiency and accuracy. Additionally, claims for personal lines and small-business insurance are anticipated to be largely automated, enabling carriers to achieve straight-through-processing rates of more than 90 percent. This automation will dramatically reduce claims processing times from days to hours or even minutes.
 ```
 
-Revisando la sección de la base de conocimiento, se observa que la respuesta es un resumen de la sección de *Claims*, por ende se puede concluir que la respuesta de la aplicación se basa en el contenido del documento, convirtiendolo en un agente especulista en dicha información.
+Revisando la sección de la base de conocimiento, se observa que la respuesta es un resumen de la sección de *Claims*, por ende se puede concluir que la respuesta de la aplicación se basa en el contenido del documento, convirtiendolo en un agente especialista en dicha información.
 
 <p align="center">
   <img src="resources/claims.png" alt="RAG" width="1000" height="auto">
@@ -231,5 +233,11 @@ Revisando la sección de la base de conocimiento, se observa que la respuesta es
 
 
 ### Despliegue en la nube
+
+Los desarrollos de esta aplicación se probaron en una EC2 de AWS. Se propone un archivo [Docker](/Dockerfile) el cual tiene contenerizado el backend desarrollado en FastAPI.
+
+Para GCP se propone el uso de **Cloud Run**. Si el tráfico no es muy alto, con la imagen de Docker se puede hacer el despliegue de forma automática y por demanda. En caso de que requiera una instancia permanente, se puede usar el servicio de **Compute Engine** y desplegar una máquina tipo *e2-standard-2* basada en Linux. Se puede montar Docker y desplegar el servicio y al mismo tiempo el front en la misma instancia.
+
+Para la base de datos vectorial se desplegó un contenedor de Docker basado en la [documentación](https://docs.trychroma.com/production/containers/docker#docker). Si se quiere tener el cliente de chroma como una base transversal a todos los desarrollos, se requeriría su ejecución en una máquina aparte. Dependiendo de la demanda, puede ser una *e2-standard-2* o una *e2-standard-4*.
 
 
